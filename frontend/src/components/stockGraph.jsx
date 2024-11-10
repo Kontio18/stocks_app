@@ -6,6 +6,10 @@ import './stockGraph.css';
 import useDebounce from './../hooks/useDebounce';
 import { TIMESTAMP_FORMAT } from './../utils/timestampFormat';
 
+const generateUniqueId = () => {
+    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+};
+
 const StockGraph = () => {
     const [stock, setStock] = useState('ANF'); 
     const debouncedStock = useDebounce(stock, 500);
@@ -186,34 +190,43 @@ const StockGraph = () => {
 
         const trackerGroup = svg.append('g').attr('class', 'tracker-line-group').style('z-index', 1); // needed because this allows proper z-index stacking 
 
-        const createTrackerLine = (extraAttrs = {}) => {
+        const createTrackerLine = (extraAttrs = {},uid) => {
             var trackerLine = trackerGroup.append('line')
                 .attr('class','tracker-line')
                 .attr('y1', 0)
                 .attr('y2', height);
+            trackerLine.attr('uid',uid ?? null);
             trackerLine = passAttributes(trackerLine, extraAttrs);
             return trackerLine;
         }
 
         const trackerLine = createTrackerLine(); // create hovering tracker line
 
-        const createTrackerBall = (extraAttrs = {}) => {
+        const createTrackerBall = (extraAttrs = {},uid) => {
             var ball = svg.append('circle')
                 .attr('class','tracker-ball')
                 .attr('r', 2);
+            ball.attr('uid',uid ?? null);
             ball = passAttributes(ball, extraAttrs);
             return ball;
         }
 
         const ball = createTrackerBall(); // create hovering tracker line ball to show where it intersects the tracker
 
-        const createTooltip = (extraAttrs = {}) => {
+        const createTooltip = (extraAttrs = {},uid) => {
             var tooltip = svg.append('foreignObject').attr('class', 'tooltip');
+            tooltip.attr('uid',uid ?? null);
             tooltip = passAttributes(tooltip, extraAttrs);
+            tooltip.on('click', function(e) {
+                e.stopPropagation();
+                d3.select(this).remove(); // delete tooltip
+                d3.selectAll(`.tracker-line[uid="${uid}"]`).remove(); // delete tooltip tracker line
+                d3.selectAll(`.tracker-ball[uid="${uid}"]`).remove(); // delete tooltip tracker ball
+            });
             return tooltip;
         }
 
-        const tooltip = createTooltip(); // shows info about the data at the cursor's intersects
+        const tooltip = createTooltip().style('opacity',0); // shows info about the data at the cursor's intersects
 
         // invisible rectangle for detecting mouseover event
         svg.append('rect')
@@ -262,7 +275,7 @@ const StockGraph = () => {
                             .duration(1000)
                             .attr('d', line);
 
-                        brushRectangle.call(brush.move,null)
+                        brushRectangle.call(brush.move,null); // removes the brush
                     });
 
         const brushRectangle = svg.append('g')
@@ -271,21 +284,23 @@ const StockGraph = () => {
 
         // copy and freeze current tooltip and tracker on click
         svg.on('click', function(e) {
+            var frozenToolTipUID = generateUniqueId();
             const frozenTrackerLine = createTrackerLine({
                 'x1': x(closestData.date),
                 'x2': x(closestData.date)
-            });
+            },
+            frozenToolTipUID);
 
-            var frozenBall = createTrackerBall({
+            const frozenBall = createTrackerBall({
                 'cx': x(closestData.date),
                 'cy': y(closestData.price),
                 'fill': 'purple',
-                'stroke': 'purple'});
+                'stroke': 'purple'},
+                frozenToolTipUID);
 
-            var frozenTooltip = createTooltip()
+            const frozenTooltip = createTooltip({},frozenToolTipUID)
                 .attr('x',`${e.pageX-30}px`)
                 .attr('y',`${e.pageY-200}px`)
-                .style('opacity',1)
                 .html(`<strong>Date:</strong><br> ${d3.timeFormat(TIMESTAMP_FORMAT)(closestData.date)}<br><strong>Price:</strong><br> $${closestData?.price?.toFixed(2)}`)
                 .classed('frozen-tooltip',true);
         });

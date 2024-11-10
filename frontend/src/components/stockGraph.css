@@ -1,7 +1,6 @@
-/* Light Mode Styles */
 #stock-graph-wrapper {
     background-color: white;
-    color: #333; /* Dark gray for text */
+    color: #333;
 }
 
 #stock-graph-wrapper .line {
@@ -11,17 +10,22 @@
 
 #stock-graph-wrapper .tooltip {
 	position: absolute;
-    background-color: steelblue; /* Light gray for tooltip */
+    background-color: steelblue;
     color: #ebebeb;
-    border: 1px solid #ccc; /* Border to separate tooltip visually */
+    border: 1px solid #ccc;
     border-radius: 4px;
     padding: 5px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     width: 200px;
     height: 100px;
 	z-index: 50;
-	opacity: 0;
-	pointer-events: none;
+	/*opacity: 0;*/
+	/*pointer-events: none;*/
+}
+#stock-graph-wrapper .tooltip:hover {
+	cursor: pointer;
+	opacity: .95;
+	transition: .3s;
 }
 
 #stock-graph-wrapper .frozen-tooltip {
@@ -44,17 +48,16 @@
 
 #stock-graph-wrapper .x-axis text,
 #stock-graph-wrapper .y-axis text {
-    fill: #555; /* Medium gray for axis text */
+    fill: #555;
 }
 
 #stock-graph-wrapper .brush .selection {
-    fill: rgba(70, 130, 180, 0.2); /* Steelblue with some transparency */
+    fill: rgba(70, 130, 180, 0.2);
 }
 
-/* Dark Mode Styles */
 .dark #stock-graph-wrapper {
     background-color: #1e1e1e;
-    color: #ddd; /* Light gray for text */
+    color: #ddd;
 }
 
 .dark #stock-graph-wrapper .line {
@@ -62,9 +65,9 @@
 }
 
 .dark #stock-graph-wrapper .tooltip {
-    background-color: #333; /* Dark gray for tooltip */
+    background-color: #333;
     color: #ddd;
-    border: 1px solid #555; /* Slightly lighter gray border */
+    border: 1px solid #555;
     border-radius: 4px;
     padding: 5px;
     box-shadow: 0 2px 6px rgba(255, 255, 255, 0.1);
@@ -72,14 +75,13 @@
 
 .dark #stock-graph-wrapper .x-axis text,
 .dark #stock-graph-wrapper .y-axis text {
-    fill: #aaa; /* Light gray for axis text */
+    fill: #aaaaaa;
 }
 
 .dark #stock-graph-wrapper .brush .selection {
-    fill: rgba(70, 130, 180, 0.5); /* Steelblue with more opacity */
+    fill: rgba(70, 130, 180, 0.5);
 }
 
-/* Ball and tracker lines */
 #stock-graph-wrapper .tracker-line,
 #stock-graph-wrapper .ball {
     stroke: steelblue;
