@@ -1,0 +1,93 @@
+/* Light Mode Styles */
+#stock-graph-wrapper {
+    background-color: white;
+    color: #333; /* Dark gray for text */
+}
+
+#stock-graph-wrapper .line {
+    stroke: steelblue;
+    stroke-width: 1;
+}
+
+#stock-graph-wrapper .tooltip {
+	position: absolute;
+    background-color: steelblue; /* Light gray for tooltip */
+    color: #ebebeb;
+    border: 1px solid #ccc; /* Border to separate tooltip visually */
+    border-radius: 4px;
+    padding: 5px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    width: 200px;
+    height: 100px;
+	z-index: 50;
+	opacity: 0;
+	pointer-events: none;
+}
+
+#stock-graph-wrapper .frozen-tooltip {
+    background-color: #ebebeb;
+    color: steelblue;
+}
+
+#stock-graph-wrapper .tracker-line {
+    stroke: steelblue;
+    stroke-width: 1;
+    z-index: 1;
+    position: absolute;
+}
+
+#stock-graph-wrapper .tracker-ball {
+	fill: steelblue;
+	stroke: steelblue;
+	pointer-events: none;
+}
+
+#stock-graph-wrapper .x-axis text,
+#stock-graph-wrapper .y-axis text {
+    fill: #555; /* Medium gray for axis text */
+}
+
+#stock-graph-wrapper .brush .selection {
+    fill: rgba(70, 130, 180, 0.2); /* Steelblue with some transparency */
+}
+
+/* Dark Mode Styles */
+.dark #stock-graph-wrapper {
+    background-color: #1e1e1e;
+    color: #ddd; /* Light gray for text */
+}
+
+.dark #stock-graph-wrapper .line {
+    stroke: steelblue;
+}
+
+.dark #stock-graph-wrapper .tooltip {
+    background-color: #333; /* Dark gray for tooltip */
+    color: #ddd;
+    border: 1px solid #555; /* Slightly lighter gray border */
+    border-radius: 4px;
+    padding: 5px;
+    box-shadow: 0 2px 6px rgba(255, 255, 255, 0.1);
+}
+
+.dark #stock-graph-wrapper .x-axis text,
+.dark #stock-graph-wrapper .y-axis text {
+    fill: #aaa; /* Light gray for axis text */
+}
+
+.dark #stock-graph-wrapper .brush .selection {
+    fill: rgba(70, 130, 180, 0.5); /* Steelblue with more opacity */
+}
+
+/* Ball and tracker lines */
+#stock-graph-wrapper .tracker-line,
+#stock-graph-wrapper .ball {
+    stroke: steelblue;
+    fill: steelblue;
+}
+
+.dark #stock-graph-wrapper .tracker-line,
+.dark #stock-graph-wrapper .ball {
+    stroke: steelblue;
+    fill: steelblue;
+}
