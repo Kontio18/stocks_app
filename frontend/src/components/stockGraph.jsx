@@ -261,9 +261,11 @@ const StockGraph = () => {
                             .transition()
                             .duration(1000)
                             .attr('d', line);
+
+                        brushRectangle.call(brush.move,null)
                     });
 
-        svg.append('g')
+        const brushRectangle = svg.append('g')
             .attr('class', 'brush')
             .call(brush);
 
