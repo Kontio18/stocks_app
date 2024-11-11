@@ -41,7 +41,7 @@
 }
 
 #stock-graph-wrapper .tracker-ball {
-	fill: steelblue;
+	fill: purple;
 	stroke: steelblue;
 	pointer-events: none;
 }

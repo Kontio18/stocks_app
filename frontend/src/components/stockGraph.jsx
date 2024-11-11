@@ -11,7 +11,7 @@ const generateUniqueId = () => {
 };
 
 const StockGraph = () => {
-    const [stock, setStock] = useState('ANF'); 
+    const [stock, setStock] = useState('NVD'); 
     const debouncedStock = useDebounce(stock, 500);
     // const [startDate, setStartDate] = useState('2024-10-15'); // default start date
     const [startDate, setStartDate] = useState('1900-01-01'); // default start date
@@ -116,6 +116,7 @@ const StockGraph = () => {
         const handleMousemove = (e) => {
             const [mouseX] = d3.pointer(e);
             const dateAtMouse = x.invert(mouseX); // gets x intercept
+
             closestData = findClosestDataPoint(stockData,dateAtMouse); // finds closest value in stock data array
             if(closestData){
                 // update tooltip
@@ -130,7 +131,7 @@ const StockGraph = () => {
                     .attr('y1', 0)
                     .attr('y2', height);
                 ball
-                    .attr('cx', x(dateAtMouse))
+                    .attr('cx', x(closestData.date))
                     .attr('cy', y(closestData.price));
             }
         };
@@ -190,35 +191,35 @@ const StockGraph = () => {
 
         const trackerGroup = svg.append('g').attr('class', 'tracker-line-group').style('z-index', 1); // needed because this allows proper z-index stacking 
 
-        const createTrackerLine = (extraAttrs = {},uid) => {
-            var trackerLine = trackerGroup.append('line')
+        const createTrackerLine = (extraAttrs = {}) => {
+            var trackerLine = trackerGroup
+                .append('line')
                 .attr('class','tracker-line')
                 .attr('y1', 0)
                 .attr('y2', height);
-            trackerLine.attr('uid',uid ?? null);
             trackerLine = passAttributes(trackerLine, extraAttrs);
             return trackerLine;
         }
 
         const trackerLine = createTrackerLine(); // create hovering tracker line
 
-        const createTrackerBall = (extraAttrs = {},uid) => {
+        const createTrackerBall = (extraAttrs = {}) => {
             var ball = svg.append('circle')
                 .attr('class','tracker-ball')
                 .attr('r', 2);
-            ball.attr('uid',uid ?? null);
             ball = passAttributes(ball, extraAttrs);
             return ball;
         }
 
         const ball = createTrackerBall(); // create hovering tracker line ball to show where it intersects the tracker
 
-        const createTooltip = (extraAttrs = {},uid) => {
-            var tooltip = svg.append('foreignObject').attr('class', 'tooltip');
-            tooltip.attr('uid',uid ?? null);
+        const createTooltip = (extraAttrs = {}) => {
+            var tooltip = svg.append('foreignObject')
+                .attr('class', 'tooltip');
             tooltip = passAttributes(tooltip, extraAttrs);
             tooltip.on('click', function(e) {
                 e.stopPropagation();
+                var uid = e.target.getAttribute('uid');
                 d3.select(this).remove(); // delete tooltip
                 d3.selectAll(`.tracker-line[uid="${uid}"]`).remove(); // delete tooltip tracker line
                 d3.selectAll(`.tracker-ball[uid="${uid}"]`).remove(); // delete tooltip tracker ball
@@ -258,7 +259,7 @@ const StockGraph = () => {
 
                         x.domain([Math.min(minDate,maxDate), Math.max(minDate,maxDate)]);
                         y.domain([Math.min(minValue,maxValue), Math.max(minValue,maxValue)]);
-                 
+
                         // update the axes and the graphed line smoothly
                         svg.select('.x-axis')
                             .transition()
@@ -275,6 +276,24 @@ const StockGraph = () => {
                             .duration(1000)
                             .attr('d', line);
 
+                        // update position of every tooltip by running graph coordinates against new scales 
+                        svg.selectAll('.frozen-tracker-line')
+                            .transition()
+                            .duration(1000)
+                            .attr('x1',(d)=>x(d.date))
+                            .attr('x2',(d)=>x(d.date));
+
+                        svg.selectAll('.frozen-tracker-ball')
+                            .transition()
+                            .duration(1000)
+                            .attr('cx',(d)=>x(d.closestData.date))
+                            .attr('cy',(d)=>y(d.closestData.price));
+
+                        svg.selectAll('.frozen-tooltip')
+                            .transition()
+                            .duration(1000) 
+                            .attr('x',(d)=>(x(d.date)+10).toString())
+
                         brushRectangle.call(brush.move,null); // removes the brush
                     });
 
@@ -285,20 +304,27 @@ const StockGraph = () => {
         // copy and freeze current tooltip and tracker on click
         svg.on('click', function(e) {
             var frozenToolTipUID = generateUniqueId();
+            console.log('pre closestData.date',closestData.date)
             const frozenTrackerLine = createTrackerLine({
-                'x1': x(closestData.date),
-                'x2': x(closestData.date)
-            },
-            frozenToolTipUID);
+                    'x1': x(closestData.date),
+                    'x2': x(closestData.date)
+                })
+                .datum({date: closestData.date})
+                .attr('uid',frozenToolTipUID)
+                .classed('frozen-tracker-line',true);
 
             const frozenBall = createTrackerBall({
                 'cx': x(closestData.date),
                 'cy': y(closestData.price),
                 'fill': 'purple',
-                'stroke': 'purple'},
-                frozenToolTipUID);
+                'stroke': 'purple'})
+                .datum({closestData: closestData})
+                .attr('uid',frozenToolTipUID)
+                .classed('frozen-tracker-ball',true);
 
-            const frozenTooltip = createTooltip({},frozenToolTipUID)
+            const frozenTooltip = createTooltip({})
+                .datum({date: closestData.date})
+                .attr('uid',frozenToolTipUID)
                 .attr('x',`${e.pageX-30}px`)
                 .attr('y',`${e.pageY-200}px`)
                 .html(`<strong>Date:</strong><br> ${d3.timeFormat(TIMESTAMP_FORMAT)(closestData.date)}<br><strong>Price:</strong><br> $${closestData?.price?.toFixed(2)}`)

@@ -1,1 +1,1 @@
-export const TIMESTAMP_FORMAT = '%b %e %Y';
+export const TIMESTAMP_FORMAT = '%b %e, %Y';
