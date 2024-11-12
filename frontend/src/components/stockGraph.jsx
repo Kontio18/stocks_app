@@ -348,6 +348,33 @@ const StockGraph = () => {
                 .html(`<strong>Date:</strong><br> ${d3.timeFormat(TIMESTAMP_FORMAT)(closestData.date)}<br><strong>Price:</strong><br> $${closestData?.price?.toFixed(2)}`)
                 .classed('frozen-tooltip',true);
         });
+    
+
+        // set up the zoom
+        const zoom = d3.zoom()
+            .scaleExtent([1, 10]) // min and max scale
+            .on('zoom', (event) => {
+                const { transform } = event;
+
+                // sets the area of the graph to be the new domains of the axes
+                x.range([0, width].map(d => transform.applyX(d)));
+                y.range([height, 0].map(d => transform.applyY(d)));
+
+                // update the axes and the graphed line smoothly
+                svg.select('.x-axis').call(d3.axisBottom(x));
+                svg.select('.y-axis').call(d3.axisLeft(y));
+                svg.select('.line')
+                    .attr('d', line(stockData));
+            });
+        svg.call(zoom);
+
+        // // zoom on mousewheel
+        // svg.on('wheel', (e) => {
+        //     e.preventDefault();
+        //     const zoomFactor = e.deltaY < 0 ? 1.1 : 0.92;
+        //     svg.transition().duration(100).call(zoom.scaleBy, zoomFactor);
+        // });
+
     };
 
     function formatAsCurrency(amount) {
