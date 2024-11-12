@@ -78,6 +78,7 @@ const StockGraph = () => {
 
     // returns data point closest to mouse position
     const findClosestDataPoint = (stockData, dateAtMouse) => {
+
         // binary search to find this faster
         var left = 0;
         var right = stockData.length-1;
@@ -111,19 +112,32 @@ const StockGraph = () => {
             .append('g')
             .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
+        const getYIntercept = (date) => {
+            const index = d3.bisector(d => d.date).left(stockData, date);
+            const left = stockData[index - 1];
+            const right = stockData[index];
+
+            if (left && right) {
+                const ratio = (date - left.date) / (right.date - left.date);
+                const interpolatedY = left.price + (right.price - left.price) * ratio;
+                return y(interpolatedY);
+            }
+            return null;
+        }
         let closestData;
         const handleMousemove = (e) => {
             const [mouseX] = d3.pointer(e);
-            const dateAtMouse = x.invert(mouseX); // gets x intercept
+            const dateAtMouse = x.invert(mouseX);
+            const yIntercept = getYIntercept(dateAtMouse);
 
-            closestData = findClosestDataPoint(stockData,dateAtMouse); // finds closest value in stock data array
-            if(closestData){
+            closestData = findClosestDataPoint(stockData,dateAtMouse);
+            if(yIntercept != null){
                 // update tooltip
                 tooltip
                     .html(`<strong>Date:</strong><br> ${d3.timeFormat(TIMESTAMP_FORMAT)(closestData.date)}<br><strong>Price:</strong><br> $${closestData?.price?.toFixed(2)}`)
                     .style('opacity', 1)
-                    .style('x', `${mouseX+10}px`)
-                    .style('y', `${e.pageY-200}px`);
+                    .style('x', `${e.pageX-330}px`)
+                    .style('y', `${e.pageY-180}px`);
                 trackerLine
                     .attr('x1', x(dateAtMouse))
                     .attr('x2', x(dateAtMouse))
@@ -131,8 +145,8 @@ const StockGraph = () => {
                     .attr('y2', height)
                     .style('opacity',1);
                 ball
-                    .attr('cx', x(closestData.date))
-                    .attr('cy', y(closestData.price))
+                    .attr('cx', mouseX)
+                    .attr('cy', yIntercept)
                     .style('opacity',1);
             }
         };
@@ -305,18 +319,21 @@ const StockGraph = () => {
         // copy and freeze current tooltip and tracker on click
         svg.on('click', function(e) {
             var frozenToolTipUID = generateUniqueId();
-            console.log('pre closestData.date',closestData.date)
+            const [mouseX] = d3.pointer(e);
+            const dateAtMouse = x.invert(mouseX);
+            const yIntercept = getYIntercept(dateAtMouse);
+
             const frozenTrackerLine = createTrackerLine({
-                    'x1': x(closestData.date),
-                    'x2': x(closestData.date)
+                    'x1': mouseX,
+                    'x2': mouseX
                 })
                 .datum({date: closestData.date})
                 .attr('uid',frozenToolTipUID)
                 .classed('frozen-tracker-line',true);
 
             const frozenBall = createTrackerBall({
-                'cx': x(closestData.date),
-                'cy': y(closestData.price),
+                'cx': mouseX,
+                'cy': yIntercept,
                 'fill': 'purple',
                 'stroke': 'purple'})
                 .datum({closestData: closestData})
@@ -326,8 +343,8 @@ const StockGraph = () => {
             const frozenTooltip = createTooltip({})
                 .datum({date: closestData.date})
                 .attr('uid',frozenToolTipUID)
-                .attr('x',`${e.pageX-30}px`)
-                .attr('y',`${e.pageY-200}px`)
+                .attr('x',`${e.pageX-330}px`)
+                .attr('y',`${e.pageY-180}px`)
                 .html(`<strong>Date:</strong><br> ${d3.timeFormat(TIMESTAMP_FORMAT)(closestData.date)}<br><strong>Price:</strong><br> $${closestData?.price?.toFixed(2)}`)
                 .classed('frozen-tooltip',true);
         });
