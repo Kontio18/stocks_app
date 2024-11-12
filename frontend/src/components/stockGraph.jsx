@@ -122,16 +122,18 @@ const StockGraph = () => {
                 tooltip
                     .html(`<strong>Date:</strong><br> ${d3.timeFormat(TIMESTAMP_FORMAT)(closestData.date)}<br><strong>Price:</strong><br> $${closestData?.price?.toFixed(2)}`)
                     .style('opacity', 1)
-                    .style('x', `${e.pageX-30}px`)
+                    .style('x', `${mouseX+10}px`)
                     .style('y', `${e.pageY-200}px`);
                 trackerLine
                     .attr('x1', x(dateAtMouse))
                     .attr('x2', x(dateAtMouse))
                     .attr('y1', 0)
-                    .attr('y2', height);
+                    .attr('y2', height)
+                    .style('opacity',1);
                 ball
                     .attr('cx', x(closestData.date))
-                    .attr('cy', y(closestData.price));
+                    .attr('cy', y(closestData.price))
+                    .style('opacity',1);
             }
         };
         svg.on('mousemove', handleMousemove); // update ui when mouse moves
@@ -200,7 +202,7 @@ const StockGraph = () => {
             return trackerLine;
         }
 
-        const trackerLine = createTrackerLine(); // create hovering tracker line
+        const trackerLine = createTrackerLine().style('opacity',0); // create hovering tracker line
 
         const createTrackerBall = (extraAttrs = {}) => {
             var ball = svg.append('circle')
@@ -210,7 +212,7 @@ const StockGraph = () => {
             return ball;
         }
 
-        const ball = createTrackerBall(); // create hovering tracker line ball to show where it intersects the tracker
+        const ball = createTrackerBall().style('opacity',0); // create hovering tracker line ball to show where it intersects the tracker
 
         const createTooltip = (extraAttrs = {}) => {
             var tooltip = svg.append('foreignObject')
