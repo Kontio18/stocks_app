@@ -1,3 +1,6 @@
+* {
+	user-select: none;
+}
 th, td {
 	text-align: left;
 }

@@ -19,8 +19,6 @@
     width: 200px;
     height: 100px;
 	z-index: 50;
-	/*opacity: 0;*/
-	/*pointer-events: none;*/
 }
 #stock-graph-wrapper .tooltip:hover {
 	cursor: pointer;

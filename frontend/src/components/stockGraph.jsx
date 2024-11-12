@@ -13,7 +13,6 @@ const generateUniqueId = () => {
 const StockGraph = () => {
     const [stock, setStock] = useState('NVD'); 
     const debouncedStock = useDebounce(stock, 500);
-    // const [startDate, setStartDate] = useState('2024-10-15'); // default start date
     const [startDate, setStartDate] = useState('1900-01-01'); // default start date
     const [endDate, setEndDate] = useState('2024-10-16'); // default end date
     const [profit, setProfit] = useState(null);

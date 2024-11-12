@@ -61,7 +61,7 @@ app.get('/api/earliest-date', async (req, res) => {
 
         const historicalData = response.data.chart.result[0];
         
-        // Check if we have data for the requested symbol
+        // check if we have data for the requested symbol
         if (!historicalData || !historicalData.timestamp || historicalData.timestamp.length === 0) {
             return res.status(404).json({ error: 'Symbol not found or no historical data available' });
         }
@@ -78,27 +78,30 @@ app.get('/api/earliest-date', async (req, res) => {
     }
 });
 
+app.get('/api/search-stocks', async (req, res) => {
+	const { query } = req.query;
+	if (!query) {
+		return res.status(400).json({ error: 'Search query is required' });
+	}
+
+	try {
+		const response = await axios.get(
+			`https://query1.finance.yahoo.com/v1/finance/search?q=${query}`,
+			{params: { q: query, quotesCount: 5, newsCount: 0 }}
+		);
+
+		const stocks = response.data.quotes.map(stock => ({
+			symbol: stock.symbol,
+			name: stock.shortname || stock.longname || stock.symbol,
+			exchange: stock.exchange,
+		}));
+		res.json(stocks);
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ error: 'Failed to fetch stock data' });
+	}
+});
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
