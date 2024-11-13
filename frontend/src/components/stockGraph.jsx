@@ -365,6 +365,7 @@ const StockGraph = () => {
                 svg.select('.y-axis').call(d3.axisLeft(y));
                 svg.select('.line')
                     .attr('d', line(stockData));
+                handleMousemove(event);
             });
         svg.call(zoom);
 
