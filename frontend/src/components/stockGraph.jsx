@@ -397,7 +397,8 @@ const StockGraph = () => {
 
     const fetchEarliestDate = async () => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/earliest-date?symbol=${debouncedStock}`);
+            var url = `http://localhost:5000/api/earliest-date?symbol=${debouncedStock}`;
+            const response = await axios.get(url);
             const newEarliestDate = formatDateString(response.data.earliestDate);
             setEarliestDate(newEarliestDate);
 

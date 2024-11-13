@@ -57,7 +57,7 @@ app.get('/api/earliest-date', async (req, res) => {
 
     try {
         // request a large range to ensure you get the earliest data
-        const response = await axios.get(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=100y`);
+        const response = await axios.get(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=100y&interval=1d`);
 
         const historicalData = response.data.chart.result[0];
         

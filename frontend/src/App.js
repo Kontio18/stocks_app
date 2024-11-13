@@ -10,13 +10,13 @@ const { Sider } = Layout;
 function App() {
 
   const fetchStocks = async (query) => {
-    console.log('query',query)
+    // console.log('query',query)
     const url = `http://localhost:5000/api/search-stocks?query=${!query ? 'A' : query}`;
-    console.log('url',url)
+    // console.log('url',url)
     const response = await fetch(url);
     if (!response.ok) throw new Error('Network response was not ok');
     const result = await response.json();
-    console.log('result',result)
+    // console.log('result',result)
     setAvailableStocks(result);
   };
 
