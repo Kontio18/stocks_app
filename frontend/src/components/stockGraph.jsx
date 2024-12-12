@@ -11,7 +11,7 @@ const generateUniqueId = () => {
 };
 
 const StockGraph = () => {
-    const [stock, setStock] = useState('NVD'); 
+    const [stock, setStock] = useState('LLY'); 
     const debouncedStock = useDebounce(stock, 500);
     const [startDate, setStartDate] = useState('1900-01-01'); // default start date
     const [endDate, setEndDate] = useState('2024-10-16'); // default end date
@@ -97,6 +97,7 @@ const StockGraph = () => {
 
 
     const drawGraph = () => {
+
         // dimensions for graph
         const margin = { top: 20, right: 30, bottom: 40, left: 40 };
         const width = 800 - margin.left - margin.right;
@@ -107,6 +108,7 @@ const StockGraph = () => {
 
         // create new graph
         const svg = d3.select(svgRef.current)
+            .attr('id','stock-graph')
             .attr('width', width + margin.left + margin.right)
             .attr('height', height + margin.top + margin.bottom)
             .append('g')
@@ -162,6 +164,7 @@ const StockGraph = () => {
         const x = d3.scaleTime()
             .domain(d3.extent(stockData, d => d.date))
             .range([0, width]);
+
         svg.append('g')
             .attr('class', 'x-axis')
             .attr('transform', `translate(0,${height})`)
@@ -178,7 +181,6 @@ const StockGraph = () => {
         const line = d3.line()
             .x(d => x(d.date))
             .y(d => y(d.price));
-
 
         // add the graphed line
         svg.append('path')
@@ -246,6 +248,7 @@ const StockGraph = () => {
 
         // invisible rectangle for detecting mouseover event
         svg.append('rect')
+            .attr('class','monitoring-rect')
             .attr('width', width)
             .attr('height', height)
             .style('z-index',99)
@@ -261,60 +264,60 @@ const StockGraph = () => {
             .attr('height', height);
 
         // set up zoom brush
-        var brush = d3.brush() // brush event is a drag selection in d3
-                    .on('end', (e)=>{
-                        if(!e.selection) return
+        // var brush = d3.brush() // brush event is a drag selection in d3
+        //             .on('end', (e)=>{
+        //                 if(!e.selection) return
 
-                        // gets the four corners of the users drag selection and sets the area of the selection to be the new domains of the axes
-                        var [[x0, y0], [x1, y1]] = e.selection;
-                        var minDate = x.invert(x0);
-                        var maxDate = x.invert(x1);
-                        var minValue = y.invert(y0);
-                        var maxValue = y.invert(y1);
+        //                 // gets the four corners of the users drag selection and sets the area of the selection to be the new domains of the axes
+        //                 var [[x0, y0], [x1, y1]] = e.selection;
+        //                 var minDate = x.invert(x0);
+        //                 var maxDate = x.invert(x1);
+        //                 var minValue = y.invert(y0);
+        //                 var maxValue = y.invert(y1);
 
-                        x.domain([Math.min(minDate,maxDate), Math.max(minDate,maxDate)]);
-                        y.domain([Math.min(minValue,maxValue), Math.max(minValue,maxValue)]);
+        //                 x.domain([Math.min(minDate,maxDate), Math.max(minDate,maxDate)]);
+        //                 y.domain([Math.min(minValue,maxValue), Math.max(minValue,maxValue)]);
 
-                        // update the axes and the graphed line smoothly
-                        svg.select('.x-axis')
-                            .transition()
-                            .duration(1000)
-                            .call(d3.axisBottom(x));
+        //                 // update the axes and the graphed line smoothly
+        //                 svg.select('.x-axis')
+        //                     .transition()
+        //                     .duration(1000)
+        //                     .call(d3.axisBottom(x));
 
-                        svg.select('.y-axis')
-                            .transition()
-                            .duration(1000)
-                            .call(d3.axisLeft(y));
+        //                 svg.select('.y-axis')
+        //                     .transition()
+        //                     .duration(1000)
+        //                     .call(d3.axisLeft(y));
 
-                        svg.selectAll('.line')
-                            .transition()
-                            .duration(1000)
-                            .attr('d', line);
+        //                 svg.selectAll('.line')
+        //                     .transition()
+        //                     .duration(1000)
+        //                     .attr('d', line);
 
-                        // update position of every tooltip by running graph coordinates against new scales 
-                        svg.selectAll('.frozen-tracker-line')
-                            .transition()
-                            .duration(1000)
-                            .attr('x1',(d)=>x(d.date))
-                            .attr('x2',(d)=>x(d.date));
+        //                 // update position of every tooltip by running graph coordinates against new scales 
+        //                 svg.selectAll('.frozen-tracker-line')
+        //                     .transition()
+        //                     .duration(1000)
+        //                     .attr('x1',(d)=>x(d.date))
+        //                     .attr('x2',(d)=>x(d.date));
 
-                        svg.selectAll('.frozen-tracker-ball')
-                            .transition()
-                            .duration(1000)
-                            .attr('cx',(d)=>x(d.closestData.date))
-                            .attr('cy',(d)=>y(d.closestData.price));
+        //                 svg.selectAll('.frozen-tracker-ball')
+        //                     .transition()
+        //                     .duration(1000)
+        //                     .attr('cx',(d)=>x(d.closestData.date))
+        //                     .attr('cy',(d)=>y(d.closestData.price));
 
-                        svg.selectAll('.frozen-tooltip')
-                            .transition()
-                            .duration(1000) 
-                            .attr('x',(d)=>(x(d.date)+10).toString())
+        //                 svg.selectAll('.frozen-tooltip')
+        //                     .transition()
+        //                     .duration(1000) 
+        //                     .attr('x',(d)=>(x(d.date)+10).toString())
 
-                        brushRectangle.call(brush.move,null); // removes the brush
-                    });
+        //                 brushRectangle.call(brush.move,null); // removes the brush
+        //             });
 
-        const brushRectangle = svg.append('g')
-            .attr('class', 'brush')
-            .call(brush);
+        // const brushRectangle = svg.append('g')
+        //     .attr('class', 'brush')
+        //     .call(brush);
 
         // copy and freeze current tooltip and tracker on click
         svg.on('click', function(e) {
@@ -350,34 +353,205 @@ const StockGraph = () => {
         });
     
 
-        // set up the zoom
-        const zoom = d3.zoom()
-            .scaleExtent([1, 10]) // min and max scale
-            .on('zoom', (event) => {
-                const { transform } = event;
+        // // set up the zoom
+        // const zoom = d3.zoom()
+        //     .scaleExtent([1, 5]) // min and max scale
+        //     // .translateExtent([[0,0],[width,height]])
+        //     .on('zoom', (event) => {
+        //         const { transform } = event;
+        //         if(Math.abs(transform.k-1) < .01){
+        //             transform.x = 0;
+        //             transform.y = 0;
+        //         }
+        //         // sets the area of the graph to be the new domains of the axes
+        //         x.range([0, width].map(d => d*transform.k+transform.x));
+        //         y.range([height, 0].map(d => d*transform.k+transform.y));
 
-                // sets the area of the graph to be the new domains of the axes
-                x.range([0, width].map(d => transform.applyX(d)));
-                y.range([height, 0].map(d => transform.applyY(d)));
+        //         // update the axes and the graphed line smoothly
+        //         svg.select('.x-axis').call(d3.axisBottom(x));
+        //         svg.select('.y-axis').call(d3.axisLeft(y));
+        //         svg.select('.line')
+        //             .attr('d', line(stockData));
+        //         handleMousemove(event);
 
-                // update the axes and the graphed line smoothly
-                svg.select('.x-axis').call(d3.axisBottom(x));
-                svg.select('.y-axis').call(d3.axisLeft(y));
-                svg.select('.line')
-                    .attr('d', line(stockData));
-                handleMousemove(event);
-            });
-        svg.call(zoom);
+        //         // update position of every tooltip by running graph coordinates against new scales 
+        //         svg.selectAll('.frozen-tracker-line')
+        //             .attr('x1',(d)=>x(d.date))
+        //             .attr('x2',(d)=>x(d.date));
 
-        // // zoom on mousewheel
-        // svg.on('wheel', (e) => {
-        //     e.preventDefault();
-        //     const zoomFactor = e.deltaY < 0 ? 1.1 : 0.92;
-        //     svg.transition().duration(100).call(zoom.scaleBy, zoomFactor);
-        // });
+        //         svg.selectAll('.frozen-tracker-ball') 
+        //             .attr('cx',(d)=>x(d.closestData.date))
+        //             .attr('cy',(d)=>y(d.closestData.price));
+
+        //         svg.selectAll('.frozen-tooltip')
+        //             .transition()
+        //             .duration(1000) 
+        //             .attr('x',(d)=>(x(d.date)+10).toString())
+        //     });
+        //     svg.call(zoom,  d3.zoomIdentity)
+        //     .on('mousedown.zoom', null)
+        //     .on('touchstart.zoom', null)
+        //     .on('touchmove.zoom', null)
+        //     .on('touchend.zoom', null);
+
+
+        // add button if it doesn't already exist
+        if (d3.select('.stock-graph-wrapper button').empty()) {
+            d3.select('.stock-graph-wrapper').append('br');
+            var resetZoomButton = d3.select('.stock-graph-wrapper')
+              .append('button')
+              .attr('type', 'button')
+              .text('Reset Zoom')
+              .on('click', resetZoom);
+        }
+
+        function resetZoom(e) {
+            svg.select('.x-axis')
+                .transition()
+                .duration(1000)
+                .call(d3.axisBottom(d3.scaleTime()
+            .domain(d3.extent(stockData.filter(d => new Date(d.date) >= new Date(new Date().getFullYear(), 0, 1)), d => d.date))
+            .range([0, width])));
+
+            svg.select('.y-axis')
+                .transition()
+                .duration(1000)
+                .call(d3.axisLeft(y));
+
+            // maps x and y access to date and price attributes
+            svg.select('.line')
+                .transition()
+                .duration(1000)
+                .attr('d', line(stockData));
+            svg.transition().duration(100);
+        }
+
+        const timeRanges = [
+          { label: "1W", value: "1w" },
+          { label: "1M", value: "1m" },
+          { label: "YTD", value: "ytd" },
+          { label: "1Y", value: "1y" },
+          { label: "5Y", value: "5y" }
+        ];
+
+        if (!d3.select('.time-range-wrapper').empty()) {
+            d3.select('.time-range-wrapper').remove();
+        }
+        d3.select('.stock-graph-wrapper').append('br');
+        d3.select('.stock-graph-wrapper').append('g')
+            .attr('class','time-range-wrapper');
+        var latestDate = stockData[stockData.length-1].date;
+        timeRanges.forEach((time)=>{
+            var range = time.value;
+            var disabledButton = false;
+            var now = new Date();
+
+            switch (range) {
+                case "1w":
+                    if(latestDate <= new Date(d3.timeWeek.offset(now, -1))){
+                        disabledButton = true;
+                    }
+                    break;
+                case "1m":
+                    if(latestDate <= new Date(d3.timeMonth.offset(now, -1))){
+                        disabledButton = true;
+                    }
+                    break;
+                case "ytd":
+                    if(latestDate <= new Date(now.getFullYear(), 0, 1)){
+                        disabledButton = true;
+                    }
+                    break;
+                case "1y":
+                    if(latestDate <= new Date(d3.timeYear.offset(now, -1))){
+                        disabledButton = true;
+                    }
+                    break;
+                case "5y":
+                    if(latestDate <= new Date(d3.timeYear.offset(now, -5))){
+                        disabledButton = true;
+                    }
+                    break;
+            }
+
+            var trButton = d3.select('.time-range-wrapper')
+              .append('button')
+              .attr('type', 'button')
+              .attr('value', time.value)
+              .text(time.label)
+              .on('click', (e)=>{handleTimeButtonClick(e,x,y,svg,line)});
+            if(disabledButton){
+              trButton.attr('disabled', 'true')
+            }
+        })
 
     };
+    function handleTimeButtonClick(e,x,y,svg,line){
 
+        let filteredData;
+        var range = e.target.value;
+        let newXDomain;
+        let firstDate;
+        var now = new Date();
+        switch (range) {
+            case "1w":
+                firstDate = d3.timeWeek.offset(now, -1);
+                filteredData = stockData.filter(d => new Date(d.date) >= new Date(d3.timeWeek.offset(now, -1)));
+                break;
+            case "1m":
+                firstDate = d3.timeMonth.offset(now, -1);
+                filteredData = stockData.filter(d => new Date(d.date) >= new Date(d3.timeMonth.offset(now, -1)));
+                break;
+            case "ytd":
+                firstDate = new Date(now.getFullYear(), 0, 1);
+                filteredData = stockData.filter(d => new Date(d.date) >= new Date(now.getFullYear(), 0, 1));
+                break;
+            case "1y":
+                firstDate = d3.timeYear.offset(now, -1);
+                filteredData = stockData.filter(d => new Date(d.date) >= new Date(d3.timeYear.offset(now, -1)));
+                break;
+            case "5y":
+                firstDate = d3.timeYear.offset(now, -5);
+                filteredData = stockData.filter(d => new Date(d.date) >= new Date(d3.timeYear.offset(now, -5)));
+                break;
+            default:
+              filteredData = stockData;
+        }
+
+        if(filteredData.length){
+            x.domain(d3.extent(filteredData, d => d.date))
+        }
+        // update the axes and the graphed line smoothly
+        svg.select('.x-axis')
+            .transition()
+            .duration(1000)
+            .call(d3.axisBottom(x));                
+
+        svg.select('.y-axis')
+            .transition()
+            .duration(1000)
+            .call(d3.axisLeft(y));
+
+        svg.selectAll('.line')
+            .transition()
+            .duration(1000)
+            .attr('d', line);
+
+        // update position of every tooltip by running graph coordinates against new scales 
+        svg.selectAll('.frozen-tracker-line')
+            .attr('x1',(d)=>x(d.date))
+            .attr('x2',(d)=>x(d.date));
+
+        svg.selectAll('.frozen-tracker-ball') 
+            .attr('cx',(d)=>x(d.closestData.date))
+            .attr('cy',(d)=>y(d.closestData.price));
+
+        svg.selectAll('.frozen-tooltip')
+            .transition()
+            .duration(1000) 
+            .attr('x',(d)=>(x(d.date)+10).toString())
+
+    }
     function formatAsCurrency(amount) {
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
@@ -493,7 +667,10 @@ const StockGraph = () => {
                     </tbody>
                 </table>
             </form>
-            <svg ref={svgRef}></svg>
+            <div className='stock-graph-wrapper'>
+                <svg ref={svgRef}></svg>
+            </div>
+            <br/>
             <h2>Profit: {profit}</h2>
             {loading && <p>Loading...</p>}
             {error && <p>Error: {error}</p>}
